@@ -9,6 +9,10 @@ const productRoutes = Router();
 // Requisito 3: Listar e Pesquisar Produtos (Público)
 productRoutes.get("/", async (req, res) => {
   // TODO: Suas tarefas aqui:
+
+  const products = await prisma.product.findMany({include: {images: true}})
+  
+  res.json(products)
   // 1. Pegar parâmetros de busca/filtro via req.query (ex: /products?search=camiseta)
   // 2. Consultar produtos no Prisma incluindo as imagens (include: { images: true })
   // 3. Retornar lista de produtos
@@ -22,6 +26,7 @@ productRoutes.post(
   ensureAdmin,
   upload.array("images", 5),
   async (req, res) => {
+
     try {
       const { name, description, price, stock } = req.body;
       if (!name || price === undefined) {
@@ -32,7 +37,7 @@ productRoutes.post(
 
       const files = req.files as Express.Multer.File[];
 
-      const imageUrls = files?.map((file) => file.path) || [];
+      const imageUrls = files.map((file: any) => file.path || file.secure_url);
 
       const product = await prisma.product.create({
         data: {
