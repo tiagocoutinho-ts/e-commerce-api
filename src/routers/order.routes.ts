@@ -3,7 +3,7 @@ import { prisma } from '../lib/prisma.js';
 
 const orderRoutes = Router();
 
-// Requisito 4: Criar Pedido / Checkout (Recebe os itens do carrinho ou direto e gera o checkout)
+// Criar Pedido / Checkout (Recebe os itens do carrinho ou direto e gera o checkout)
 orderRoutes.post('/checkout', async (req, res) => {
   // TODO: Sua lógica aqui:
   // 1. Pegar o userId do usuário autenticado (ou req.body)
@@ -15,14 +15,14 @@ orderRoutes.post('/checkout', async (req, res) => {
   // 7. Retornar a URL de pagamento ou confirmação
 });
 
-// Requisito 4: Listar histórico de pedidos do usuário
+// Listar histórico de pedidos do usuário
 orderRoutes.get('/', async (req, res) => {
   // TODO: Sua lógica aqui:
   // 1. Buscar os pedidos salvos do usuário (prisma.order.findMany)
   // 2. Incluir os itens do pedido e imagens dos produtos (include: { items: { include: { product: true } } })
 });
 
-// Requisito 4/Webhook: Receber confirmação de pagamento (Stripe Webhook)
+// Webhook: Receber confirmação de pagamento (Stripe Webhook)
 orderRoutes.post('/webhook', async (req, res) => {
   // TODO: Sua lógica aqui:
   // 1. Confirmar que o pagamento foi aprovado pelo gateway

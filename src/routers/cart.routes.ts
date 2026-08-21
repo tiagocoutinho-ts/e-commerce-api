@@ -4,7 +4,7 @@ import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 
 const cartRoutes = Router();
 
-// Requisito 2: Adicionar produto ao carrinho
+// Adicionar produto ao carrinho
 cartRoutes.post("/items", ensureAuthenticated, async (req, res) => {
   try {
     const userId = (req as any).user.id;
@@ -71,9 +71,78 @@ cartRoutes.post("/items", ensureAuthenticated, async (req, res) => {
   }
 });
 
-// Requisito 2: Remover produto do carrinho
+// Remover produto do carrinho
 cartRoutes.delete("/items/:id", async (req, res) => {
-  // TODO: Suas tarefas aqui
+  try {
+    const userId = (req as any).user.id;
+    const { id } = req.params; 
+
+    if (!id) {
+      return res.status(400).json({ error: "ID do item é obrigatório." });
+    }
+
+    const cartItem = await prisma.cartItem.findFirst({
+      where: {
+        id,
+        cart: {
+          userId,
+        },
+      },
+    });
+
+    if (!cartItem) {
+      return res
+        .status(404)
+        .json({ error: "Item não encontrado no carrinho deste usuário." });
+    }
+
+    await prisma.cartItem.delete({
+      where: { id },
+    });
+
+    const updatedCart = await prisma.cart.findUnique({
+      where: { userId },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    return res.status(200).json(updatedCart);
+  } catch (error) {
+    console.error("Erro ao remover item do carrinho:", error);
+    return res
+      .status(500)
+      .json({ error: "Erro interno ao remover item do carrinho." });
+  }
+});
+
+cartRoutes.delete("/clear", ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+    });
+
+    if (cart) {
+      await prisma.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+    }
+
+    return res.status(200).json({ message: "Carrinho esvaziado com sucesso." });
+  } catch (error) {
+    console.error("Erro ao esvaziar carrinho:", error);
+    return res.status(500).json({ error: "Erro interno ao esvaziar carrinho." });
+  }
 });
 
 export { cartRoutes };
