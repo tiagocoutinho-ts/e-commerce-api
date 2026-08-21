@@ -1,33 +1,100 @@
-import { Router } from 'express';
-import { prisma } from '../lib/prisma.js';
+import { Router } from "express";
+import { prisma } from "../lib/prisma.js";
+import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 
 const orderRoutes = Router();
 
-// Criar Pedido / Checkout (Recebe os itens do carrinho ou direto e gera o checkout)
-orderRoutes.post('/checkout', async (req, res) => {
-  // TODO: Sua lógica aqui:
-  // 1. Pegar o userId do usuário autenticado (ou req.body)
-  // 2. Buscar o carrinho ativo do usuário com seus itens
-  // 3. Calcular o valor total dos produtos
-  // 4. Criar a sessão de pagamento na API do Stripe (ou simulador)
-  // 5. Salvar a Order com status "PENDING" e criar os OrderItems no Prisma
-  // 6. Limpar o carrinho do usuário
-  // 7. Retornar a URL de pagamento ou confirmação
+// Finalizar a compra (Checkout)
+orderRoutes.post("/checkout", ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+    const { shippingAddress } = req.body;
+
+    // Buscar o carrinho atual do usuário com os produtos
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      include: {
+        items: {
+          include: { product: true },
+        },
+      },
+    });
+
+    if (!cart || cart.items.length === 0) {
+      return res.status(400).json({ error: "Seu carrinho está vazio." });
+    }
+
+    // Calcula o total e prepara os itens do pedido
+    let total = 0;
+    const orderItemsData = cart.items.map((item) => {
+      total += item.product.price * item.quantity;
+      return {
+        productId: item.productId,
+        quantity: item.quantity,
+        price: item.product.price,
+      };
+    });
+
+    // 3. Transação: Cria o pedido com o endereço e limpa o carrinho
+    const order = await prisma.$transaction(async (tx) => {
+      const newOrder = await tx.order.create({
+        data: {
+          userId,
+          total,
+          status: "PENDING",
+          shippingAddress: shippingAddress || "Endereço não informado",
+          items: {
+            createMany: {
+              data: orderItemsData,
+            },
+          },
+        },
+        include: {
+          items: {
+            include: { product: true },
+          },
+        },
+      });
+
+      // Esvazia os itens do carrinho após fechar o pedido
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id },
+      });
+
+      return newOrder;
+    });
+
+    return res.status(201).json(order);
+  } catch (error) {
+    console.error("Erro no checkout:", error);
+    return res.status(500).json({ error: "Erro interno ao processar checkout." });
+  }
 });
 
-// Listar histórico de pedidos do usuário
-orderRoutes.get('/', async (req, res) => {
-  // TODO: Sua lógica aqui:
-  // 1. Buscar os pedidos salvos do usuário (prisma.order.findMany)
-  // 2. Incluir os itens do pedido e imagens dos produtos (include: { items: { include: { product: true } } })
-});
+// Buscar histórico de pedidos do usuário
+orderRoutes.get("/my-orders", ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
 
-// Webhook: Receber confirmação de pagamento (Stripe Webhook)
-orderRoutes.post('/webhook', async (req, res) => {
-  // TODO: Sua lógica aqui:
-  // 1. Confirmar que o pagamento foi aprovado pelo gateway
-  // 2. Atualizar o status do Order para "PAID"
-  // 3. Baixar o estoque dos produtos no banco (Product.stock)
+    const orders = await prisma.order.findMany({
+      where: { userId },
+      include: {
+        items: {
+          include: {
+            product: true,
+          },
+        },
+      },
+      orderBy: {
+        createdAt: "desc",
+      },
+    });
+
+    return res.status(200).json(orders);
+  } catch (error) {
+    console.error("Erro ao buscar pedidos:", error);
+    return res.status(500).json({ error: "Erro interno ao buscar pedidos." });
+  }
 });
 
 export { orderRoutes };

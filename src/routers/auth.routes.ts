@@ -1,6 +1,6 @@
 import "dotenv/config";
 import { Router } from "express";
-import { prisma } from "../lib/prisma.ts";
+import { prisma } from "../lib/prisma.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
@@ -16,7 +16,7 @@ authRoutes.post("/register", async (req, res) => {
     }
 
     const userExist = await prisma.user.findUnique({ where: { email } });
-    if (userExist) return res.status(409).json("Conflict");
+    if (userExist) return res.status(409).json({ error: "E-mail já cadastrado." });
 
     const hash = await bcrypt.hash(password, 10);
     const user = await prisma.user.create({

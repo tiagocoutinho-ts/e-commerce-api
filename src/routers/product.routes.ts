@@ -6,16 +6,27 @@ import { upload } from "../lib/cloudinary.js";
 
 const productRoutes = Router();
 
-// Requisito 3: Listar e Pesquisar Produtos (Público)
+// Listar e Pesquisar Produtos (Público)
 productRoutes.get("/", async (req, res) => {
-  // TODO: Suas tarefas aqui:
+  try {
+    const { search } = req.query;
 
-  const products = await prisma.product.findMany({include: {images: true}})
-  
-  res.json(products)
-  // 1. Pegar parâmetros de busca/filtro via req.query (ex: /products?search=camiseta)
-  // 2. Consultar produtos no Prisma incluindo as imagens (include: { images: true })
-  // 3. Retornar lista de produtos
+    const products = await prisma.product.findMany({
+      where: search
+        ? {
+            OR: [
+              { name: { contains: String(search) } },
+              { description: { contains: String(search) } },
+            ],
+          }
+        : undefined,
+      include: { images: true },
+    });
+
+    return res.json(products);
+  } catch (error) {
+    return res.status(500).json({ error: "Erro ao buscar produtos." });
+  }
 });
 
 // Criar Produto (Painel Admin)

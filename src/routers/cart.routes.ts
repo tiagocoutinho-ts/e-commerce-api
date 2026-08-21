@@ -72,10 +72,10 @@ cartRoutes.post("/items", ensureAuthenticated, async (req, res) => {
 });
 
 // Remover produto do carrinho
-cartRoutes.delete("/items/:id", async (req, res) => {
+cartRoutes.delete("/items/:id", ensureAuthenticated, async (req, res) => {
   try {
     const userId = (req as any).user.id;
-    const { id } = req.params; 
+    const id = Array.isArray(req.params.id) ? req.params.id[0] : String(req.params.id);
 
     if (!id) {
       return res.status(400).json({ error: "ID do item é obrigatório." });

@@ -8,15 +8,30 @@ datasource db {
 }
 
 model User {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   name      String
-  email     String   @unique
+  email     String    @unique
   password  String
-  role      String   @default("customer")
-  createdAt DateTime @default(now())
+  role      String    @default("customer")
+  createdAt DateTime  @default(now())
 
-  cart   Cart?
-  orders Order[]
+  cart      Cart?
+  orders    Order[]
+  addresses Address[] 
+}
+
+model Address {
+  id           String   @id @default(uuid())
+  street       String   // Rua / Avenida
+  number       String   // Número
+  complement   String?  // AP, Bloco, etc (Opcional)
+  neighborhood String   // Bairro
+  city         String   // Cidade
+  state        String   // Estado (UF)
+  zipCode      String   // CEP
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt    DateTime @default(now())
 }
 
 model Product {
@@ -59,13 +74,14 @@ model CartItem {
 }
 
 model Order {
-  id        String      @id @default(uuid())
-  total     Float
-  status    String      @default("PENDING")
-  userId    String
-  user      User        @relation(fields: [userId], references: [id])
-  createdAt DateTime    @default(now())
-  items     OrderItem[]
+  id              String      @id @default(uuid())
+  total           Float
+  status          String      @default("PENDING")
+  shippingAddress String?     // Salva o texto/JSON do endereço onde o pedido foi entregue
+  userId          String
+  user            User        @relation(fields: [userId], references: [id])
+  createdAt       DateTime    @default(now())
+  items           OrderItem[]
 }
 
 model OrderItem {
