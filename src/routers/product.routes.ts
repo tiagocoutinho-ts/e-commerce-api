@@ -29,6 +29,22 @@ productRoutes.get("/", async (req, res) => {
   }
 });
 
+//Encontra produto por ID
+productRoutes.get("/product/:id", async (req, res) => {
+  try {
+    const productId = req.params.id;
+
+    const product = await prisma.product.findUnique({
+      where: { id: productId },
+      include: { images: true },
+    });
+
+    return res.status(200).json(product);
+  } catch (error) {
+    res.status(500).json({ error: "Produto não encontrado." });
+  }
+});
+
 // Criar Produto (Painel Admin)
 // Apenas Administradores Autenticados
 productRoutes.post(
@@ -37,7 +53,6 @@ productRoutes.post(
   ensureAdmin,
   upload.array("images", 5),
   async (req, res) => {
-
     try {
       const { name, description, price, stock } = req.body;
       if (!name || price === undefined) {
