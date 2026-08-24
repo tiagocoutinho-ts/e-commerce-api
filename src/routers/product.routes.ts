@@ -30,7 +30,7 @@ productRoutes.get("/", async (req, res) => {
 });
 
 //Encontra produto por ID
-productRoutes.get("/product/:id", async (req, res) => {
+productRoutes.get("/:id", async (req, res) => {
   try {
     const productId = req.params.id;
 
