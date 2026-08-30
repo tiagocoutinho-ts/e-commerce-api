@@ -4,6 +4,37 @@ import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 
 const cartRoutes = Router();
 
+// Buscar o carrinho do usuário logado
+cartRoutes.get("/", ensureAuthenticated, async (req, res) => {
+  try {
+    const userId = (req as any).user.id;
+
+    const cart = await prisma.cart.findUnique({
+      where: { userId },
+      include: {
+        items: {
+          include: {
+            product: {
+              include: {
+                images: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!cart) {
+      return res.status(200).json({ items: [] });
+    }
+
+    return res.status(200).json(cart);
+  } catch (error) {
+    console.error("Erro ao buscar carrinho:", error);
+    return res.status(500).json({ error: "Erro interno ao buscar carrinho." });
+  }
+});
+
 // Adicionar produto ao carrinho
 cartRoutes.post("/items", ensureAuthenticated, async (req, res) => {
   try {
