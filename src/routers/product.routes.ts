@@ -1,8 +1,9 @@
-import { Request, Router } from "express";
+import { Request, Response, Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 import { ensureAdmin } from "../middlewares/ensureAdmin.js";
 import { upload } from "../lib/cloudinary.js";
+import { Prisma } from "../../generated/prisma/client.js";
 
 const productRoutes = Router();
 
@@ -11,15 +12,20 @@ productRoutes.get("/", async (req, res) => {
   try {
     const { search } = req.query;
 
-    const products = await prisma.product.findMany({
-      where: search
+    const whereCondition: Prisma.ProductWhereInput = {
+      active: true, // Retorna apenas produtos ativos para a loja pública
+      ...(search
         ? {
             OR: [
               { name: { contains: String(search) } },
               { description: { contains: String(search) } },
             ],
           }
-        : undefined,
+        : {}),
+    };
+
+    const products = await prisma.product.findMany({
+      where: whereCondition,
       include: { images: true },
     });
 
@@ -28,6 +34,25 @@ productRoutes.get("/", async (req, res) => {
     return res.status(500).json({ error: "Erro ao buscar produtos." });
   }
 });
+
+// Listar Todos os Produtos (Apenas Painel Admin - Ativos e Inativos)
+productRoutes.get(
+  "/admin/all",
+  ensureAuthenticated,
+  ensureAdmin,
+  async (req: Request, res: Response) => {
+    try {
+      const products = await prisma.product.findMany({
+        include: { images: true },
+        orderBy: { createdAt: "desc" },
+      });
+
+      return res.json(products);
+    } catch (error) {
+      return res.status(500).json({ error: "Erro ao buscar produtos do admin." });
+    }
+  }
+);
 
 //Encontra produto por ID
 productRoutes.get("/:id", async (req, res) => {
@@ -89,11 +114,12 @@ productRoutes.post(
   }
 );
 
+// Soft Delete / Inativar Produto
 productRoutes.delete(
   "/:id",
   ensureAuthenticated,
   ensureAdmin,
-  async (req: Request<{ id: string }>, res) => {
+  async (req: Request<{ id: string }>, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -101,18 +127,19 @@ productRoutes.delete(
         return res.status(400).json({ error: "ID inválido." });
       }
 
-      const product = await prisma.product.delete({
+      const product = await prisma.product.update({
         where: { id },
+        data: { active: false },
       });
 
       return res.status(200).json({
-        message: "Produto deletado com sucesso.",
+        message: "Produto desativado com sucesso.",
         product,
       });
     } catch (error) {
       return res
         .status(500)
-        .json({ error: "Erro interno ao deletar produto." });
+        .json({ error: "Erro interno ao desativar produto." });
     }
   }
 );
