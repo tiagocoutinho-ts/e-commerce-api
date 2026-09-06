@@ -1,4 +1,4 @@
-import { Router } from "express";
+import { Request, Router } from "express";
 import { prisma } from "../lib/prisma.js";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 import { ensureAdmin } from "../middlewares/ensureAdmin.js";
@@ -85,6 +85,34 @@ productRoutes.post(
       return res
         .status(500)
         .json({ error: "Erro interno ao cadastrar produto." });
+    }
+  }
+);
+
+productRoutes.delete(
+  "/:id",
+  ensureAuthenticated,
+  ensureAdmin,
+  async (req: Request<{ id: string }>, res) => {
+    try {
+      const { id } = req.params;
+
+      if (!id) {
+        return res.status(400).json({ error: "ID inválido." });
+      }
+
+      const product = await prisma.product.delete({
+        where: { id },
+      });
+
+      return res.status(200).json({
+        message: "Produto deletado com sucesso.",
+        product,
+      });
+    } catch (error) {
+      return res
+        .status(500)
+        .json({ error: "Erro interno ao deletar produto." });
     }
   }
 );
