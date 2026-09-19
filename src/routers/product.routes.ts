@@ -3,37 +3,13 @@ import { prisma } from "../lib/prisma.js";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 import { ensureAdmin } from "../middlewares/ensureAdmin.js";
 import { upload } from "../lib/cloudinary.js";
-import { Prisma } from "../../generated/prisma/client.js";
+import { ProductController } from "../controllers/product.controller.js";
 
 const productRoutes = Router();
+const productController = new ProductController();
 
 // Listar e Pesquisar Produtos (Público)
-productRoutes.get("/", async (req, res) => {
-  try {
-    const { search } = req.query;
-
-    const whereCondition: Prisma.ProductWhereInput = {
-      active: true, // Retorna apenas produtos ativos para a loja pública
-      ...(search
-        ? {
-            OR: [
-              { name: { contains: String(search) } },
-              { description: { contains: String(search) } },
-            ],
-          }
-        : {}),
-    };
-
-    const products = await prisma.product.findMany({
-      where: whereCondition,
-      include: { images: true },
-    });
-
-    return res.json(products);
-  } catch (error) {
-    return res.status(500).json({ error: "Erro ao buscar produtos." });
-  }
-});
+productRoutes.get("/", productController.listPublic);
 
 // Listar Todos os Produtos (Apenas Painel Admin - Ativos e Inativos)
 productRoutes.get(
@@ -49,7 +25,9 @@ productRoutes.get(
 
       return res.json(products);
     } catch (error) {
-      return res.status(500).json({ error: "Erro ao buscar produtos do admin." });
+      return res
+        .status(500)
+        .json({ error: "Erro ao buscar produtos do admin." });
     }
   }
 );
