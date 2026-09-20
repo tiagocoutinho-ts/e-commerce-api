@@ -1,5 +1,4 @@
-import { Request, Response, Router } from "express";
-import { prisma } from "../lib/prisma.js";
+import { Router } from "express";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 import { ensureAdmin } from "../middlewares/ensureAdmin.js";
 import { upload } from "../lib/cloudinary.js";

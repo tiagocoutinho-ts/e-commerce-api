@@ -1,4 +1,4 @@
-import { CreateProductDTO } from "../controllers/product.types";
+import { CreateProductDTO } from "../controllers/types/product.types";
 import { ProductRepository } from "../repositories/product.repository";
 
 const productRepository = new ProductRepository();

@@ -1,5 +1,4 @@
 import { Router } from "express";
-import { prisma } from "../lib/prisma.js";
 import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js";
 import { CartController } from "../controllers/cart.controller.js";
 
