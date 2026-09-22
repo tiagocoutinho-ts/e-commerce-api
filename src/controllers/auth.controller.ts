@@ -32,6 +32,12 @@ export class AuthController {
         password,
       });
 
+      res.cookie("token", authResult.token, {
+        httpOnly: true,
+        sameSite: "strict",
+        maxAge: 7 * 24 * 60 * 60 * 1000
+      })
+
       return res.status(200).json(authResult);
     } catch (error: any) {
       if (error.message === "Preencha todos os campos.") {

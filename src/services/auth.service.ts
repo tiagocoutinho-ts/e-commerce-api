@@ -60,7 +60,7 @@ export class AuthService {
     const token = jwt.sign(
       { id: user.id, email: user.email, role: user.role },
       secret,
-      { expiresIn: "1d" }
+      { expiresIn: "7d" }
     );
 
     return {

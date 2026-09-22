@@ -14,13 +14,11 @@ export function ensureAuthenticated(
   res: Response,
   next: NextFunction
 ) {
-  const authHeader = req.headers.authorization;
+  const token = req.cookies.token
 
-  if (!authHeader) {
+  if (!token) {
     return res.status(401).json({ error: "Token de autenticação não fornecido." });
   }
-
-  const [, token] = authHeader.split(" ");
 
   try {
     const decoded = jwt.verify(
@@ -28,7 +26,6 @@ export function ensureAuthenticated(
       process.env.JWT_SECRET as string
     ) as TokenPayload;
 
-    // Injeta os dados do usuário dentro da requisição
     (req as any).user = {
       id: decoded.id,
       email: decoded.email,
