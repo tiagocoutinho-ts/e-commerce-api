@@ -73,4 +73,14 @@ export class AuthService {
       token,
     };
   }
+
+  async getUserById(userId: string) {
+    const user = authRepository.findById(userId);
+
+    if (!user) {
+      throw new Error("Usuário não encontrado.");
+    }
+
+    return user;
+  }
 }

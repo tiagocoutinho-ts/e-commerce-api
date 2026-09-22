@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { AuthController } from "../controllers/auth.controller.js";
+import { ensureAuthenticated } from "../middlewares/ensureAuthenticated.js"
 
 const authRoutes = Router();
 const authController = new AuthController();
@@ -83,6 +84,38 @@ authRoutes.post("/register", authController.register);
  *         description: Credenciais inválidas
  */
 authRoutes.post("/login", authController.login);
+
+/**
+ * @openapi
+ * /auth/me:
+ *   get:
+ *     summary: Retorna os dados do usuário autenticado com base no cookie
+ *     tags: [Auth]
+ *     security:
+ *       - cookieAuth: []
+ *     responses:
+ *       200:
+ *         description: Dados do usuário retornados com sucesso
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     email:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *       401:
+ *         description: Não autorizado (Cookie ausente ou inválido)
+ */
+authRoutes.get("/me", ensureAuthenticated, authController.me);
 
 /**
  * @openapi

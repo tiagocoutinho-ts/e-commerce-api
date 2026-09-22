@@ -50,6 +50,20 @@ export class AuthController {
     }
   }
 
+  async me(req: Request, res: Response): Promise<Response> {
+    try {
+      const userId = (req as any).user.id;
+
+      const user = await authService.getUserById(userId);
+
+      return res.status(200).json({ user });
+    } catch (error: any) {
+      return res
+        .status(404)
+        .json({ error: error.message || "Erro ao buscar dados do usuário" });
+    }
+  }
+
   async logout(_, res: Response) {
     res.clearCookie("token", {
       httpOnly: true,
