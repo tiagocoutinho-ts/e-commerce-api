@@ -13,7 +13,7 @@ const cartController = new CartController();
  *     description: Retorna o carrinho atual com todos os itens e produtos associados. Requer autenticação.
  *     tags: [Cart]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Carrinho retornado com sucesso
@@ -32,7 +32,7 @@ cartRoutes.get("/", ensureAuthenticated, cartController.getByUser);
  *     description: Adiciona produtos ou aumenta a quantidade se já existirem no carrinho.
  *     tags: [Cart]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -67,7 +67,7 @@ cartRoutes.post("/items", ensureAuthenticated, cartController.addItems);
  *     description: Define uma nova quantidade para o item no carrinho. Se quantity for menor ou igual a 0, o item é removido.
  *     tags: [Cart]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -104,7 +104,7 @@ cartRoutes.put("/items", ensureAuthenticated, cartController.updateItems);
  *     description: Remove todos os itens do carrinho do usuário logado.
  *     tags: [Cart]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Carrinho esvaziado com sucesso
@@ -120,8 +120,8 @@ cartRoutes.delete("/clear", ensureAuthenticated, cartController.clear);
  *     summary: Remove um item específico do carrinho
  *     description: Remove o item do carrinho com base no ID do item do carrinho.
  *     tags: [Cart]
- *     security:
- *       - BearerAuth: []
+ *   security:
+ *    - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id

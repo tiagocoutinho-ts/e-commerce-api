@@ -13,7 +13,7 @@ const orderController = new OrderController();
  *     description: Converte os itens do carrinho atual em um novo pedido, processa a compra e limpa o carrinho. Requer autenticação.
  *     tags: [Orders]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       201:
  *         description: Pedido realizado com sucesso
@@ -32,7 +32,7 @@ orderRoutes.post("/checkout", ensureAuthenticated, orderController.checkout);
  *     description: Retorna todos os pedidos já realizados pelo usuário autenticado.
  *     tags: [Orders]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     responses:
  *       200:
  *         description: Histórico de pedidos retornado com sucesso

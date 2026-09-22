@@ -18,10 +18,11 @@ const options: swaggerJSDoc.Options = {
     components: {
       securitySchemes: {
         BearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-          description: "Insira o token JWT no formato: Bearer <seu_token>",
+          cookieAuth: {
+            type: 'apiKey',
+            in: 'cookie',
+            name: 'token'
+          }
         },
       },
     },

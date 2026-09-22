@@ -64,10 +64,32 @@ authRoutes.post("/register", authController.register);
  *                 example: 123456
  *     responses:
  *       200:
- *         description: Login realizado com sucesso (retorna o token)
+ *         description: Login realizado com sucesso. O token JWT é enviado via cookie HTTP-only.
+ *         headers:
+ *           Set-Cookie:
+ *             description: Cookie contendo o token JWT de autenticação.
+ *             schema:
+ *               type: string
+ *               example: token=abc123xyz; Path=/; HttpOnly; SameSite=Strict
+ *         content:
+ *           application/json:
+ *             schema:
+ *             ...
  *       401:
  *         description: Credenciais inválidas
  */
 authRoutes.post("/login", authController.login);
+
+/**
+ * @openapi
+ * /auth/logout:
+ *   post:
+ *     summary: Realiza o logout do usuário limpando o cookie
+ *     tags: [Auth]
+ *     responses:
+ *       200:
+ *         description: Logout realizado com sucesso. O cookie de autenticação foi removido.
+ */
+authRoutes.post("/logout", authController.logout);
 
 export { authRoutes };

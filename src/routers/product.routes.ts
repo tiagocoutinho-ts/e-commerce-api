@@ -78,7 +78,7 @@ productRoutes.get("/:id", productController.getById);
  *     description: Rota protegida para upload de até 5 imagens e dados do produto.
  *     tags: [Products]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     requestBody:
  *       required: true
  *       content:
@@ -133,7 +133,7 @@ productRoutes.post(
  *     summary: Inativa um produto (Soft Delete) (Admin)
  *     tags: [Products]
  *     security:
- *       - BearerAuth: []
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id

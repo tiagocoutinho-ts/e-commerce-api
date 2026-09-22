@@ -35,8 +35,8 @@ export class AuthController {
       res.cookie("token", authResult.token, {
         httpOnly: true,
         sameSite: "strict",
-        maxAge: 7 * 24 * 60 * 60 * 1000
-      })
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+      });
 
       return res.status(200).json(authResult);
     } catch (error: any) {
@@ -48,5 +48,14 @@ export class AuthController {
       }
       return res.status(500).json({ error: "Erro interno no servidor." });
     }
+  }
+
+  async logout(_, res: Response) {
+    res.clearCookie("token", {
+      httpOnly: true,
+      sameSite: "strict",
+    });
+
+    return res.status(200).json({ message: "Logout realizado com sucesso!" });
   }
 }
