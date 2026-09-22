@@ -120,8 +120,8 @@ cartRoutes.delete("/clear", ensureAuthenticated, cartController.clear);
  *     summary: Remove um item específico do carrinho
  *     description: Remove o item do carrinho com base no ID do item do carrinho.
  *     tags: [Cart]
- *   security:
- *    - cookieAuth: []
+ *     security:
+ *       - cookieAuth: []
  *     parameters:
  *       - in: path
  *         name: id
@@ -138,5 +138,4 @@ cartRoutes.delete("/clear", ensureAuthenticated, cartController.clear);
  *         description: Item não encontrado
  */
 cartRoutes.delete("/items/:id", ensureAuthenticated, cartController.removeItem);
-
 export { cartRoutes };

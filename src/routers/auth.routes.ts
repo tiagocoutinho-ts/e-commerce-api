@@ -74,7 +74,11 @@ authRoutes.post("/register", authController.register);
  *         content:
  *           application/json:
  *             schema:
- *             ...
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   example: Login realizado com sucesso!
  *       401:
  *         description: Credenciais inválidas
  */
